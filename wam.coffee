@@ -10,6 +10,14 @@ url = require 'url'
 unzip = require 'extract-zip'
 async = require 'async'
 
+###
+Returns a promise about moving given source path to given destination.
+
+@param [String] source      Source path to be moved.
+@param [String] destination Destination path where source path will be moved.
+
+@return [Promise] Promise that will be resolved with no parameters on success.
+###
 mvAsync = (source, destination) ->
   return new Bluebird (resolve, reject) ->
     mv = require 'mv'
@@ -17,6 +25,14 @@ mvAsync = (source, destination) ->
       return reject error if error?
       resolve()
 
+###
+Returns a promise about removing given target path, including any content stored
+there.
+
+@param [String] target Target path to be removed.
+
+@return [Promise] Promise that will be resolved with no parameters on success.
+###
 rimrafAsync = (target) ->
   return new Bluebird (resolve, reject) ->
     rimraf = require 'rimraf'
@@ -24,30 +40,14 @@ rimrafAsync = (target) ->
       return reject error if error?
       resolve()
 
-wamfileFormatError = "Invalid #{'wamfile'.magenta} format! Check
+WamfileFormatError = "Invalid #{'wamfile'.magenta} format! Check
                       #{'wamfile.demo'.magenta} for an example."
 
-wamfileFormatErrorWrongWowpathFormat =
-  "Invalid #{'wamfile'.magenta} format! #{'wowPath'.red} key should have
-   associated the path to your World of Warcraft installation. Check
-   #{'wamfile.demo'.magenta} for an example."
-
-wamfileFormatErrorWrongWowpath =
-  "Invalid #{'wamfile'.magenta} format! #{'wowPath'.red} key should have
-   associated the path to your World of Warcraft installation but the actual
-   path did not contain a World of Warcraft installation. Check
-   #{'wamfile.demo'.magenta} for an example."
-
-addonsIdentifiersHelp =
+AddonsIdentifiersHelp =
   "WAM uses Curse's identifiers. To get the identifier of an addon just use
    #{'mods.curse.com'.blue} search engine. Clicking on an Addon from search
    results list will open a page with a URL following this format:
    #{'http://mods.curse.com/addons/wow/'.blue}#{'<addon-identifier>'.yellow}."
-
-wamfileFormatErrorWrongAddonsFormat =
-  "Invalid #{'wamfile'.magenta} format! #{'addons'.red} key should have
-   associated an array of identifiers of Addons. Check #{'wamfile.demo'.magenta}
-   for an example.\n\n#{addonsIdentifiersHelp}"
 
 ErrorCodeDoesntExist = 'ENOENT'
 
@@ -73,29 +73,43 @@ fs.statAsync wamfilePath
     else
       log.error "#{error}"
 
-readWamfile = ->
+###
+Reads `wamfile` at given path and downloads addons.
+###
+readWamfile = (wamfilePath) ->
   fs.readFileAsync wamfilePath
     .then (data) ->
       try
         return JSON.parse data
       catch
-        throw wamfileFormatError
+        throw new Error WamfileFormatError
     .then (json) ->
 
       if _.isString json.wowPath
         json.addonsPath = path.resolve json.wowPath, 'Interface', 'AddOns'
         return fs.statAsync json.addonsPath
           .then (stats) ->
-            throw wamfileFormatError unless stats.isDirectory()
+            throw new Error WamfileFormatError unless stats.isDirectory()
             return json
           .caught (error) ->
             if error.code is ErrorCodeDoesntExist
-              throw wamfileFormatErrorWrongWowpathFormat
+              throw new Error "Invalid #{'wamfile'.magenta} format!
+                               #{'wowPath'.red} key should have associated the
+                               path to your World of Warcraft installation.
+                               Check #{'wamfile.demo'.magenta} for an example."
       else
-        throw wamfileFormatErrorWrongWowpath
+        throw new Error "Invalid #{'wamfile'.magenta} format! #{'wowPath'.red}
+                         key should have associated the path to your World of
+                         Warcraft installation but the actual path did not
+                         contain a World of Warcraft installation. Check
+                         #{'wamfile.demo'.magenta} for an example."
 
     .then (json) ->
-      throw wamfileFormatErrorWrongAddonsFormat unless _.isArray json.addons
+      unless _.isArray json.addons
+        throw new Error "Invalid #{'wamfile'.magenta} format! #{'addons'.red}
+                         key should have associated an array of identifiers of
+                         Addons. Check #{'wamfile.demo'.magenta} for an example.
+                         \n\n#{AddonsIdentifiersHelp}"
       return json
 
     .then (json) ->
@@ -113,14 +127,20 @@ readWamfile = ->
             log.success "Downloaded #{addon.magenta}#{version.yellow}."
             callback()
           .caught (error) ->
-            console.log "ERROR: #{error}"
             log.error error
-            console.log error
             callback error
 
     .caught (error) ->
       log.error "#{error}"
 
+###
+Returns a promise that will be resolved with the identifier assigned by Curse
+to latest version of given addon.
+
+@parameter [String] addonIdentifier Identifier used by Curse to identify the
+                                    addon.
+@return [Promise] Promise that will be resolved with addon's latest version.
+###
 getAddonMetadata = (addonIdentifier) ->
 
   return new Bluebird (resolve, reject) ->
@@ -154,6 +174,16 @@ getAddonMetadata = (addonIdentifier) ->
 
       resolve downloadURL
 
+###
+Returns a promise that will be resolved with local path to zip file for addon
+at given URL with given Curse identifier.
+
+@parameter [String] addonURL        URL to zip file returned by Curse website.
+@parameter [String] addonIdentifier Identifier assigned by Curse to the addon.
+
+@return [Promise] Promise that will be resolved with path to local copy of given
+                  zip file.
+###
 downloadAddon = (addonURL, addonIdentifier) ->
 
   return new Bluebird (resolve, reject) ->
@@ -179,7 +209,16 @@ downloadAddon = (addonURL, addonIdentifier) ->
     .on 'finish', () ->
       resolve tmpFilePath
 
-unzipAddon = (zipFilePath, addonIdentifier) ->
+###
+Unzips given local file, returning a promise that will be resolved with local
+path to unzipped folder.
+
+@param [String] zipFilePath Path to zip file to be extracted.
+
+@return [Promise] Promise that will be resolved with path to uncompressed
+                  content.
+###
+unzipAddon = (zipFilePath) ->
 
   return new Bluebird (resolve, reject) ->
 
@@ -191,6 +230,19 @@ unzipAddon = (zipFilePath, addonIdentifier) ->
       return reject error if error?
       resolve outputPath
 
+###
+Flattens content of given folder so if folder only contains directories all of
+them are moved to destination folder, otherwise container folder is moved to
+destination directory.
+
+@param [String] tmpOutputPath   Path to folder to be flattened.
+@param [String] addonIdentifier Identifier of addon being flattened.
+@param [String] addonsPath      Path to World of Warcraft addons folder, where
+                                content will be flattened.
+
+@return [Promise] Promise that will be resolved with addon's version (if known)
+                  or a `null` value.
+###
 flattenAddon = (tmpOutputPath, addonIdentifier, addonsPath) ->
 
   return new Bluebird (resolve, reject) ->
