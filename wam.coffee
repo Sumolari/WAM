@@ -7,7 +7,8 @@ _ = require 'lodash'
 path = require 'path'
 os = require 'os'
 url = require 'url'
-unzip = require 'unzip'
+unzip = require 'extract-zip'
+async = require 'async'
 
 mvAsync = (source, destination) ->
   return new Bluebird (resolve, reject) ->
@@ -99,7 +100,7 @@ readWamfile = ->
 
     .then (json) ->
 
-      promises = _.map json.addons, (addon) ->
+      promises = async.mapLimit json.addons, 100, (addon, callback) ->
         return getAddonMetadata addon
           .then (addonURL) ->
             return downloadAddon addonURL, addon
@@ -110,11 +111,12 @@ readWamfile = ->
           .then (version) ->
             version = if version? then " v#{version}" else ''
             log.success "Downloaded #{addon.magenta}#{version.yellow}."
-
-      Bluebird.all promises
-        .caught (error) ->
-          log.error error
-          console.log error
+            callback()
+          .caught (error) ->
+            console.log "ERROR: #{error}"
+            log.error error
+            console.log error
+            callback error
 
     .caught (error) ->
       log.error "#{error}"
@@ -143,6 +145,10 @@ getAddonMetadata = (addonIdentifier) ->
                               data-href=\"([^\"]*)\""
 
       match = linkRegex.exec response.body
+
+      unless match?
+        return reject "Error getting Addon information for
+                       #{addonIdentifier.yellow}"
 
       downloadURL = match[1]
 
@@ -181,14 +187,9 @@ unzipAddon = (zipFilePath, addonIdentifier) ->
     outputPath = path.resolve path.dirname(zipFilePath),
                               "#{filename.replace '.zip', ''}"
 
-    fs
-      .createReadStream zipFilePath
-      .pipe unzip.Extract
-        path: outputPath
-      .on 'close', ->
-        resolve outputPath
-      .on 'error', (error) ->
-        reject error
+    unzip zipFilePath, {dir: outputPath}, (error) ->
+      return reject error if error?
+      resolve outputPath
 
 flattenAddon = (tmpOutputPath, addonIdentifier, addonsPath) ->
 
@@ -226,7 +227,8 @@ flattenAddon = (tmpOutputPath, addonIdentifier, addonsPath) ->
               return outputPath
           .then ->
             resolve version
-          .caught reject
+          .caught (error) ->
+            reject error
 
       else
 
@@ -237,4 +239,5 @@ flattenAddon = (tmpOutputPath, addonIdentifier, addonsPath) ->
             mvAsync tmpOutputPath, outputPath
           .then ->
             resolve version
-          .caught -> reject
+          .caught (error) ->
+            reject error
