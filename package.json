@@ -15,6 +15,9 @@
 		"wow",
 		"npm"
 	],
+	"bin": {
+		"wam": "bin/wam.js"
+	},
 	"author": "Lluís Ulzurrun de Asanza i Sàez",
 	"license": "MIT",
 	"dependencies": {

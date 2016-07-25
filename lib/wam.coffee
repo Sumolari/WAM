@@ -51,27 +51,52 @@ AddonsIdentifiersHelp =
 
 ErrorCodeDoesntExist = 'ENOENT'
 
+if process.argv.length < 3
+  log.info "Usage: #{'wam'.yellow} #{'<command>'.blue}
+            #{'[wamfilePath]'.magenta}\n\
+            Commands:\n - #{'init'.blue}     Create a new wamfile with demo
+                                             content
+                     \n - #{'update'.blue}   Install or update addons in given
+                                             #{'wamfile'.magenta}"
+  process.exit 1
+
 wamfilePath = './wamfile'
-if process.argv.length > 2
-  wamfilePath = process.argv[2]
+if process.argv.length > 3
+  wamfilePath = process.argv[3]
   log.info "Using #{'wamfile'.magenta} at #{wamfilePath.yellow}."
 else
   log.info "Using local #{'wamfile'.magenta} at #{wamfilePath.yellow}."
 
-fs.statAsync wamfilePath
-  .then (stats) ->
+operations =
+  update: ->
+    log.info 'Installing or updating AddOns...'
 
-    if stats.isDirectory()
-      wamfilePath = path.resolve wamfilePath, './wamfile'
+    fs.statAsync wamfilePath
+    .then (stats) ->
 
-    readWamfile wamfilePath
+      if stats.isDirectory()
+        wamfilePath = path.resolve wamfilePath, './wamfile'
 
-  .caught (error) ->
-    if error.code is ErrorCodeDoesntExist
-      log.error "Given path (#{wamfilePath.yellow}) was neither a folder nor a
-                 #{'wamfile'.magenta}!"
-    else
-      log.error "#{error}"
+      readWamfile wamfilePath
+
+    .caught (error) ->
+      if error.code is ErrorCodeDoesntExist
+        log.error "Given path (#{wamfilePath.yellow}) was neither a folder nor a
+                   #{'wamfile'.magenta}!"
+      else
+        log.error "#{error}"
+  init: ->
+    log.info 'Creating sample configuration file...'
+    inputPath = path.resolve __dirname, '../wamfile.demo'
+    outputPath = path.resolve path.dirname(wamfilePath), 'wamfile'
+    fs
+      .createReadStream inputPath
+      .pipe fs.createWriteStream outputPath
+      .on 'close', ->
+        log.info "File ready at #{outputPath.yellow}"
+
+
+operations[process.argv[2]]()
 
 ###
 Reads `wamfile` at given path and downloads addons.
