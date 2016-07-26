@@ -1,3 +1,5 @@
+[![npm](https://img.shields.io/npm/v/wam.svg?maxAge=2592000)](https://www.npmjs.com/package/wow-am) [![npm](https://img.shields.io/npm/l/wow-am.svg?maxAge=2592000)](https://www.npmjs.com/package/wow-am)
+
 **wam** is a command-line utility to bulk install and update [World of Warcraft](https://battle.net/wow) addons on **macOS**. It uses [Curse.com](http://mods.curse.com/addons/wow) addons database.
 
 # Installation
