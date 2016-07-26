@@ -1,10 +1,12 @@
-**wam** is a command-line utility to bulk install and update [World of Warcraft](https://battle.net/wow) addons. It uses [Curse.com](http://mods.curse.com/addons/wow) addons database.
+**wam** is a command-line utility to bulk install and update [World of Warcraft](https://battle.net/wow) addons on **macOS**. It uses [Curse.com](http://mods.curse.com/addons/wow) addons database.
 
 # Installation
 
-**wam** requires NodeJS and NPM. Having both set up you can just install it as a global package:
+**wam** requires [Node.js](https://nodejs.org) and [NPM](https://www.npmjs.com). Having both set up you can just install it as a global package:
 
-`npm install -g wam`
+```
+npm install -g wam
+```
 
 # Configuration
 
@@ -15,6 +17,17 @@ A `wamfile` is just a JSON file with two keys:
 1. `wowPath` has a string associated telling **wam** where is located your World of Warcraft installation. The path should point to the folder containing World of Warcraft executable and `Interface` folder.
 1. `addons` is an array of strings. Each item is a `Curse identifier` of an addon.
 
+This is a sample `wamfile` shipped with **wam**:
+
+```
+{
+	"wowPath": "/Applications/Battle.net/World of Warcraft",
+	"addons": [
+		"deadly-boss-mod"
+	]
+}
+```
+
 ## Curse identifiers
 
 The easiest way to know the identifier of an addon is searching it in [Curse.com database](http://mods.curse.com/addons/wow). Each addon has an information page with a download link and the URL to that page follows this pattern: `http://mods.curse.com/addons/wow/<curse-identifier>`.
@@ -23,7 +36,9 @@ For instance, [Deadly Boss Mods](http://mods.curse.com/addons/wow/deadly-boss-mo
 
 # Usage
 
-`[INFO] Usage: wam <command> [wamfilePath]`
+```
+[INFO] Usage: wam <command> [wamfilePath]
+```
 
 **wam** supports two commands:
 
@@ -34,4 +49,5 @@ If no path is given the current directory will be used.
 
 # To do...
 
-[ ] Add some images to Readme.
+- [ ] Add some images to Readme.
+- [ ] Check Windows compatibility.
