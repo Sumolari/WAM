@@ -25,7 +25,7 @@ This is a sample `wamfile` shipped with **wam**:
 {
 	"wowPath": "/Applications/Battle.net/World of Warcraft",
 	"addons": [
-		"deadly-boss-mod"
+		"deadly-boss-mods"
 	]
 }
 ```
@@ -51,5 +51,7 @@ If no path is given the current directory will be used.
 
 # To do...
 
+- [ ] Fix wamfile creation when path to a folder is given
+- [ ] Fix wamfile creation when path to a file is given
 - [ ] Add some images to Readme.
 - [ ] Check Windows compatibility.
