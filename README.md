@@ -5,7 +5,7 @@
 **wam** requires [Node.js](https://nodejs.org) and [NPM](https://www.npmjs.com). Having both set up you can just install it as a global package:
 
 ```
-npm install -g wam
+npm install -g wow-am
 ```
 
 # Configuration

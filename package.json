@@ -1,8 +1,8 @@
 {
-	"name": "wam",
+	"name": "wow-am",
 	"version": "0.0.1",
 	"description": "A NPM-like World of Warcraft Addon Manager",
-	"main": "wam.js",
+	"main": "bin/wam.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
