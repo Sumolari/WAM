@@ -1,6 +1,6 @@
 {
 	"name": "wow-am",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "A NPM-like World of Warcraft Addon Manager",
 	"main": "bin/wam.js",
 	"scripts": {
@@ -18,7 +18,7 @@
 	"bin": {
 		"wam": "bin/wam.js"
 	},
-	"repository": "Sumolari/wam",
+	"repository": "Sumolari/WAM",
 	"author": "Lluís Ulzurrun de Asanza i Sàez",
 	"license": "MIT",
 	"dependencies": {
