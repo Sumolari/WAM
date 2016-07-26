@@ -18,6 +18,7 @@
 	"bin": {
 		"wam": "bin/wam.js"
 	},
+	"repository": "Sumolari/wam",
 	"author": "Lluís Ulzurrun de Asanza i Sàez",
 	"license": "MIT",
 	"dependencies": {
