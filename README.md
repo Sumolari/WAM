@@ -49,11 +49,11 @@ For instance, [Deadly Boss Mods](http://mods.curse.com/addons/wow/deadly-boss-mo
 1. `init` will create a sample `wamfile` in specified folder.
 2. `update` installs or updates addons specified by `wamfile` at given path.
 
+If no path is given the current directory will be used.
+
 ![wam init](https://cloud.githubusercontent.com/assets/779767/17184185/32c2dac8-542b-11e6-9de6-66433bad0ce7.gif)
 
 ![wam update](https://cloud.githubusercontent.com/assets/779767/17184190/3711dcd2-542b-11e6-9c29-5f3a2bc74d75.gif)
-
-If no path is given the current directory will be used.
 
 # To do...
 
