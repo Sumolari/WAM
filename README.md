@@ -10,6 +10,8 @@
 npm install -g wow-am
 ```
 
+![Installation](https://cloud.githubusercontent.com/assets/779767/17183583/7778fbe6-5428-11e6-912d-89de8724e048.gif)
+
 # Configuration
 
 **wam** reads a `wamfile` config file to know where is located your World of Warcraft installation and which addons you want to install/update.
@@ -47,11 +49,15 @@ For instance, [Deadly Boss Mods](http://mods.curse.com/addons/wow/deadly-boss-mo
 1. `init` will create a sample `wamfile` in specified folder.
 2. `update` installs or updates addons specified by `wamfile` at given path.
 
+![wam init](https://cloud.githubusercontent.com/assets/779767/17184185/32c2dac8-542b-11e6-9de6-66433bad0ce7.gif)
+
+![wam update](https://cloud.githubusercontent.com/assets/779767/17184190/3711dcd2-542b-11e6-9c29-5f3a2bc74d75.gif)
+
 If no path is given the current directory will be used.
 
 # To do...
 
-- [ ] Fix wamfile creation when path to a folder is given
-- [ ] Fix wamfile creation when path to a file is given
-- [ ] Add some images to Readme.
+- [x] Fix wamfile creation when path to a folder is given
+- [x] Fix wamfile creation when path to a file is given
+- [x] Add some images to Readme.
 - [ ] Check Windows compatibility.

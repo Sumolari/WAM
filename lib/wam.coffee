@@ -87,14 +87,38 @@ operations =
         log.error "#{error}"
   init: ->
     log.info 'Creating sample configuration file...'
+
     inputPath = path.resolve __dirname, '../wamfile.demo'
-    outputPath = path.resolve path.dirname(wamfilePath), 'wamfile'
-    fs
+
+    fs.statAsync wamfilePath
+    .then (stats) ->
+
+      if stats.isDirectory()
+        return path.resolve wamfilePath, 'wamfile'
+      else
+        return path.resolve path.dirname(wamfilePath), 'wamfile'
+
+    .caught (error) ->
+
+      throw error unless error.code is ErrorCodeDoesntExist
+
+      return fs.statAsync path.dirname wamfilePath
+      .then (stats) ->
+        if stats.isDirectory()
+          return path.resolve path.dirname(wamfilePath), 'wamfile'
+        else
+          throw error
+
+    .then (outputPath) ->
+
+      fs
       .createReadStream inputPath
       .pipe fs.createWriteStream outputPath
       .on 'close', ->
         log.info "File ready at #{outputPath.yellow}"
 
+    .caught (error) ->
+      log.error "#{error}"
 
 operations[process.argv[2]]()
 
