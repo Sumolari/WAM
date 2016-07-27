@@ -61,3 +61,17 @@ If no path is given the current directory will be used.
 - [x] Fix wamfile creation when path to a file is given
 - [x] Add some images to Readme.
 - [ ] Check Windows compatibility.
+
+# Changelog
+
+## 0.0.3
+
+- Fixed `wamfile` creation when given a path.
+
+## 0.0.2
+
+- Fixed sample `wamfile`.
+
+## 0.0.1
+
+- First released version! 🎉
