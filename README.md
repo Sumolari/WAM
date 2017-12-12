@@ -61,6 +61,9 @@ If no path is given the current directory will be used.
 - [x] Fix wamfile creation when path to a file is given
 - [x] Add some images to Readme.
 - [ ] Check Windows compatibility.
+- [ ] Port to ES6.
+- [ ] Add tests.
+- [ ] Improve metadata (version) extraction from curseforge.com.
 
 # Changelog
 
