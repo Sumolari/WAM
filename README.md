@@ -64,6 +64,10 @@ If no path is given the current directory will be used.
 
 # Changelog
 
+## 0.0.4
+
+- Add support for new curseforge.com AddOns repository.
+
 ## 0.0.3
 
 - Fixed `wamfile` creation when given a path.

@@ -1,6 +1,6 @@
 {
 	"name": "wow-am",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "A NPM-like World of Warcraft Addon Manager",
 	"main": "bin/wam.js",
 	"scripts": {
