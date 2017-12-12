@@ -195,7 +195,7 @@ getAddonMetadata = (addonIdentifier) ->
   return new Bluebird (resolve, reject) ->
 
     downloadPageURL =
-      "http://mods.curse.com/addons/wow/#{addonIdentifier}/download"
+      "https://www.curseforge.com/wow/addons/#{addonIdentifier}/download"
 
     request {
       followAllRedirects: true,
@@ -205,13 +205,9 @@ getAddonMetadata = (addonIdentifier) ->
         return reject "Error getting Addon information for
                        #{addonIdentifier.yellow}"
 
-      curseIdentifier =
-        _.last response.request.uri.href.split addonIdentifier
-      curseIdentifier = _.first curseIdentifier.split '?'
-      curseIdentifier = curseIdentifier.substr 1
-
-      linkRegex = new RegExp "data-file=\"#{curseIdentifier}\"
-                              data-href=\"([^\"]*)\""
+      linkRegex = new RegExp(
+        "href=\"(/wow/addons/#{addonIdentifier}/download/[^\"]*/file)\""
+      )
 
       match = linkRegex.exec response.body
 
@@ -221,7 +217,7 @@ getAddonMetadata = (addonIdentifier) ->
 
       downloadURL = match[1]
 
-      resolve downloadURL
+      resolve "https://www.curseforge.com#{downloadURL}"
 
 ###
 Returns a promise that will be resolved with local path to zip file for addon
@@ -238,7 +234,7 @@ downloadAddon = (addonURL, addonIdentifier) ->
   return new Bluebird (resolve, reject) ->
 
     filename = path.basename url.parse(addonURL).path
-    tmpFilePath = path.resolve os.tmpdir(), filename
+    tmpFilePath = path.resolve os.tmpdir(), "#{addonIdentifier}-#{filename}.zip"
 
     log.info "Downloading #{addonIdentifier.magenta}..."
 

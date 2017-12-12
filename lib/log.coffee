@@ -7,7 +7,7 @@ log = (header, headerLength) ->
   separator = _.repeat ' ', headerLength
   return (message) ->
     regex = new RegExp ".{1,#{80 - headerLength}}", 'g'
-    console.log header, message.match( regex ).join "\n#{separator}"
+    console.log header, "#{message}".match( regex ).join "\n#{separator}"
 
 module.exports =
   success: (message) ->
