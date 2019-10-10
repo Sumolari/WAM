@@ -9,6 +9,7 @@ os = require 'os'
 url = require 'url'
 unzip = require 'extract-zip'
 async = require 'async'
+cs = require 'cloudscraper'
 
 ###
 Returns a promise about moving given source path to given destination.
@@ -197,27 +198,25 @@ getAddonMetadata = (addonIdentifier) ->
     downloadPageURL =
       "https://www.curseforge.com/wow/addons/#{addonIdentifier}/download"
 
-    request {
-      followAllRedirects: true,
-      url: downloadPageURL
-    }, (error, response) ->
-      if error
+    cs.get downloadPageURL
+      .then (data) ->
+        linkRegex = new RegExp(
+          "/wow/addons/#{addonIdentifier}/download/[^\"]*/file"
+        )
+
+        match = linkRegex.exec data
+
+        unless match?
+          return reject "Error getting Addon information for
+                         #{addonIdentifier.yellow}"
+
+        downloadURL = match[0]
+
+        resolve "https://www.curseforge.com#{downloadURL}"
+
+      .catch (ex) ->
         return reject "Error getting Addon information for
                        #{addonIdentifier.yellow}"
-
-      linkRegex = new RegExp(
-        "href=\"(/wow/addons/#{addonIdentifier}/download/[^\"]*/file)\""
-      )
-
-      match = linkRegex.exec response.body
-
-      unless match?
-        return reject "Error getting Addon information for
-                       #{addonIdentifier.yellow}"
-
-      downloadURL = match[1]
-
-      resolve "https://www.curseforge.com#{downloadURL}"
 
 ###
 Returns a promise that will be resolved with local path to zip file for addon
