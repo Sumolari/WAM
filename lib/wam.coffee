@@ -236,22 +236,22 @@ downloadAddon = (addonURL, addonIdentifier) ->
     tmpFilePath = path.resolve os.tmpdir(), "#{addonIdentifier}-#{filename}.zip"
 
     log.info "Downloading #{addonIdentifier.magenta}..."
-
-    request {
-      followAllRedirects: true,
-      url: "#{addonURL}"
+    
+    cs.get {
+      method: 'GET',
+      uri: addonURL,
+      rejectUnauthorized: false,
+      realEncoding: null,
     }
-    .pipe fs.createWriteStream "#{tmpFilePath}"
-    .on 'error', (error) ->
-      console.log error
-      if error.code is ErrorCodeDoesntExist
-        reject "Error writing Addon #{addonIdentifier.yellow} in temporary
-                folder #{tmpFilePath.yellow}."
-      else
+    .then (body) ->
+      buffer = Buffer.from(body, 'utf8')
+      fs.writeFile(tmpFilePath)
+        .then
+          resolve tempFilePath
+        .catch (error) ->
+          reject "Error saving Addon #{addonIdentifier.yellow}."
+    .catch (error) ->
         reject "Error downloading Addon #{addonIdentifier.yellow}."
-
-    .on 'finish', () ->
-      resolve tmpFilePath
 
 ###
 Unzips given local file, returning a promise that will be resolved with local
