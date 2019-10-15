@@ -246,7 +246,7 @@ downloadAddon = (addonURL, addonIdentifier) ->
     .then (body) ->
       buffer = Buffer.from(body, 'utf8')
       fs.writeFile(tmpFilePath)
-        .then
+        .then () ->
           resolve tempFilePath
         .catch (error) ->
           reject "Error saving Addon #{addonIdentifier.yellow}."
