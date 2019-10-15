@@ -9,6 +9,7 @@ os = require 'os'
 url = require 'url'
 unzip = require 'extract-zip'
 async = require 'async'
+cs = require 'cloudscraper'
 
 ###
 Returns a promise about moving given source path to given destination.
@@ -197,27 +198,25 @@ getAddonMetadata = (addonIdentifier) ->
     downloadPageURL =
       "https://www.curseforge.com/wow/addons/#{addonIdentifier}/download"
 
-    request {
-      followAllRedirects: true,
-      url: downloadPageURL
-    }, (error, response) ->
-      if error
+    cs.get downloadPageURL
+      .then (data) ->
+        linkRegex = new RegExp(
+          "/wow/addons/#{addonIdentifier}/download/[^\"]*/file"
+        )
+
+        match = linkRegex.exec data
+
+        unless match?
+          return reject "Error getting Addon information for
+                         #{addonIdentifier.yellow}"
+
+        downloadURL = match[0]
+
+        resolve "https://www.curseforge.com#{downloadURL}"
+
+      .catch (ex) ->
         return reject "Error getting Addon information for
                        #{addonIdentifier.yellow}"
-
-      linkRegex = new RegExp(
-        "href=\"(/wow/addons/#{addonIdentifier}/download/[^\"]*/file)\""
-      )
-
-      match = linkRegex.exec response.body
-
-      unless match?
-        return reject "Error getting Addon information for
-                       #{addonIdentifier.yellow}"
-
-      downloadURL = match[1]
-
-      resolve "https://www.curseforge.com#{downloadURL}"
 
 ###
 Returns a promise that will be resolved with local path to zip file for addon
@@ -237,22 +236,25 @@ downloadAddon = (addonURL, addonIdentifier) ->
     tmpFilePath = path.resolve os.tmpdir(), "#{addonIdentifier}-#{filename}.zip"
 
     log.info "Downloading #{addonIdentifier.magenta}..."
+    
+    cs
+      method: 'GET'
+      uri: addonURL
+      rejectUnauthorized: false
+      realEncoding: null
+    .then (body) ->
 
-    request {
-      followAllRedirects: true,
-      url: "#{addonURL}"
-    }
-    .pipe fs.createWriteStream "#{tmpFilePath}"
-    .on 'error', (error) ->
-      console.log error
-      if error.code is ErrorCodeDoesntExist
-        reject "Error writing Addon #{addonIdentifier.yellow} in temporary
-                folder #{tmpFilePath.yellow}."
-      else
+      buffer = Buffer.from body, 'utf8'
+
+      fs.writeFile tmpFilePath, buffer, (error) ->
+        if error
+          reject "Error saving Addon #{addonIdentifier.yellow}."
+        else
+          resolve tmpFilePath
+          
+    .catch (error) ->
+        console.log error
         reject "Error downloading Addon #{addonIdentifier.yellow}."
-
-    .on 'finish', () ->
-      resolve tmpFilePath
 
 ###
 Unzips given local file, returning a promise that will be resolved with local
