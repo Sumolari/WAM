@@ -237,20 +237,23 @@ downloadAddon = (addonURL, addonIdentifier) ->
 
     log.info "Downloading #{addonIdentifier.magenta}..."
     
-    cs.get {
-      method: 'GET',
-      uri: addonURL,
-      rejectUnauthorized: false,
-      realEncoding: null,
-    }
+    cs
+      method: 'GET'
+      uri: addonURL
+      rejectUnauthorized: false
+      realEncoding: null
     .then (body) ->
-      buffer = Buffer.from(body, 'utf8')
-      fs.writeFile(tmpFilePath)
-        .then () ->
-          resolve tempFilePath
-        .catch (error) ->
+
+      buffer = Buffer.from body, 'utf8'
+
+      fs.writeFile tmpFilePath, buffer, (error) ->
+        if error
           reject "Error saving Addon #{addonIdentifier.yellow}."
+        else
+          resolve tmpFilePath
+          
     .catch (error) ->
+        console.log error
         reject "Error downloading Addon #{addonIdentifier.yellow}."
 
 ###
